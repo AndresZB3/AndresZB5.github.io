@@ -1,0 +1,17 @@
+html { familia de fuentes : Consolas; alinear texto : centro}
+body { display : inline-block; alineación de texto : izquierda}
+etiqueta ,  leyenda { font-weight : bold}
+* : Requerido , . obligatorio { border : thin solid blue}
+de entrada [ tipo = número ] , . numero { text-align : right}
+dfn { font-weight : bold}
+
+br  +  salida , conjunto de  campos  +  salida ,  pie de página ,  formulario  em { tamaño de fuente : pequeño}
+fieldset  p { margin : 0 }
+fieldset  label ,  label  * { font-weight : normal}
+. error { color : red}
+. usuario {
+    flotar : derecha;
+    alineación de texto : centro;
+    posición : absoluta;
+    derecha : 10 px ;
+}
