@@ -1,0 +1,356 @@
+<! DOCTYPE html >
+<! - Manejo de usuarios, llaves foráneas y archivos. ->
+< html >
+  < cabeza >
+    < meta  charset = " utf-8 " >
+    < meta  name = " viewport " content = " width = device-width, initial-scale = 1 " >
+    < meta  http-equiv = " Expires " content = " 0 " >
+    < meta  http-equiv = " Última modificación " content = " 0 " >
+    < meta  http-equiv = " Cache-Control " content = " no-cache, mustrevalidate " >
+    < meta  http-equiv = " Pragma " content = " sin caché " >
+    < título > Usuarios </ título >
+    < link  rel = " stylesheet " href = " css / estilo.css " >
+    < script  src = "/ __ / firebase / 7.8.1 / firebase - app.js " > </ script >
+    < script  src = "/ __ / firebase / 7.8.1 / firebase - auth.js " > </ script >
+    < script  src = "/ __ / firebase / 7.8.1 / firebase - firestore.js " > </ script >
+    < script  src = "/ __ / firebase / 7.8.1 / firebase - storage.js " > </ script >
+    < script  src = "/ __ / firebase / init.js " > </ script >
+    < script  src = " js / util.js " > </ script >
+ 
+    < script  type = " module " src = " js / herramientas-abc.js " > </ script >
+    < script  type = " module " src = " js / mis-checks.js " > </ script >
+    < script  type = " module " src = " js / mi-footer.js " > </ script >
+
+  </ cabeza >
+  < cuerpo >
+    < guión >
+      function  muestraUsuario ( ) {
+
+        var  user  =  firebase . auth ( ) . currentUser ;
+        deje  firestore = base de fuego  . firestore ( ) ; 
+
+        documento . getElementById ( "correo" ) . innerHTML = "Correo:" + usuario . correo electrónico ;
+        documento . getElementById ( "avatar" ) . src = usuario . photoURL ;
+        var  userrol = documento . getElementById ( "rol" ) ;
+
+        var  DocRef  =  FireStore . colección ( "USUARIO" ) . doc ( usuario . correo electrónico ) ;
+        docRef . obtener ( ) . entonces ( function  ( doc )  {
+          si  ( doc . existe )  {
+            userrol . innerHTML =  "Rol:" + doc . datos ( ) . ROL_IDS ;
+          }  más  {
+            userrol . innerHTML =  "Rol: Invitado" ;
+          }
+        } ) . catch ( function  ( error )  {
+          consola . log ( "Error al obtener el documento:" ,  error ) ;
+        } ) ;
+        
+        }
+    </ script >
+    < form  action = " javascript: guarda () " >
+      < div  class = " usuario " >
+        < img  id = " avatar " src = "" width = " 50px " style = " border-radius: 50%; " >
+        < p  id = " correo " > </ p >
+        < p  id = " rol " > </ p >
+      </ div >
+       < button  class = " btn btn-info " type = " button " id = " pasa "   onclick = " regresa (); " > Pasatiempo </ button >
+      
+      < encabezado >
+        < Br >
+        
+        < herramientas-abc > </ herramientas-abc >
+        < h1 > Usuarios </ h1 >
+      </ encabezado >
+      <! - Muestra la imagen registrada en el servidor. ->
+      < figure  id = " figure " >
+        < img  id = " img " alt = " Imagen del Usuario " width = " 200px " >
+      </ figura >
+      < fieldset >
+        < leyenda > Cue (correo electrónico) </ leyenda >
+        < input  id = " cue " type = " email " >
+      </ fieldset >
+      < fieldset >
+        < leyenda > Imagen </ leyenda >
+        < input  id = " imagen " type = " file " accept = " .png, .jpg, .jpeg, .gif " >
+      </ fieldset >
+      <! - Maneja una asociación a uno. ->
+      < fieldset >
+        < leyenda > Pasatiempo </ leyenda >
+        < select  id = " pasatiempo " >
+          < opción > Cargando… </ opción >
+        </ seleccionar >
+      </ fieldset >
+      <! - Maneja una asociación a muchos. ->
+      < fieldset >
+        < leyenda > Roles </ leyenda >
+        < mis-checks  id = " roles " >
+          < progress  max = " 100 " > Cargando… </ progress >
+        </ errores de verificación >
+      </ fieldset >
+      < ul  class = " usuarios " id = " lista " >
+        < li > < progress  max = " 100 " > Cargando… </ progress > </ li >
+      </ ul >
+     
+      < mi-footer > </ mi-footer >
+    </ formulario >
+    < guión >
+      let  id  =  "" ;
+      const  auth  = base de  fuego . auth ( ) ;
+       almacenamiento  constante = base de  fuego . almacenamiento ( ) ;
+       proveedor  constante =  nueva base de  fuego . auth . GoogleAuthProvider ( ) ;
+      proveedor . setCustomParameters ( {  prompt : "select_account"  } ) ;
+      const  firestore = base de fuego  . firestore ( ) ; 
+      auth . onAuthStateChanged (
+        async  usuarioAuth  =>  {
+          if  ( usuarioAuth  &&  usuarioAuth . email )  {
+            muestraUsuario ( )
+            cargaPasatiempos ( ) ;
+            cargaRoles ( ) ;
+            agrega ( ) ;
+            muestraLista ( ) ;
+            valida ( ) ;
+          }  más  {
+            aguardar  auth . signInWithRedirect ( proveedor ) ;
+
+          }
+        } ,
+        procesaError
+      ) ;
+      
+
+      ////////////////////////
+      function  valida ( ) {
+      const  db  = base de  fuego . firestore ( ) ;
+      var   aux2  =  "Invitado" , aux3  =  "Usuario" ;
+      var  user  =  firebase . auth ( ) . currentUser ;
+      var  nombre ,  correo electrónico ,  photoUrl ,  uid ,  emailVerified ;
+      
+      if  ( usuario ! = nulo )  {
+      nombre  =  usuario . displayName ;
+      email  =  usuario . correo electrónico ;
+      photoUrl  =  usuario . photoURL ;
+      emailVerified  =  usuario . emailVerified ;
+      uid  =  usuario . uid ;  
+      }
+      consola . log ( correo electrónico ) ;
+      db . colección ( "USUARIO" )
+      . obtener ( )
+      . luego ( function ( querySnapshot )  {
+          querySnapshot . forEach ( function ( doc )  {
+            consola . log ( doc . datos ( ) . ROL_IDS ) ;
+            if  ( email == doc . id ) {
+// SE VALIDA SI ES UN USUARIO
+if ( "Invitado" == doc . data ( ) . ROL_IDS ) {
+      ubicación . href = "index.html" ;
+      
+} if ( "Administrador" == doc . data ( ) . ROL_IDS ) {
+  esto . innerHTML  =   / * html * /
+      ' 
+      <a href="#"> Pasatiempos </a> ` ;
+} if ( "Usuario" == doc . data ( ) . ROL_IDS ) {
+  ocultar ( ) ;
+}
+  
+// SE VALIDA SI ES UN USUARIO
+              }
+              
+          } ) ;
+      
+} )
+. catch ( function ( error )  {
+    consola . log ( "Error al obtener documentos:" ,  error ) ;
+} ) ;
+
+     }
+     función  ocultar ( ) {
+      var  elemento  =  documento . getElementById ( "pasa" ) ;
+   elemento . estilo . display  =  'ninguno' ;
+}  función  regresa ( ) {
+  ubicación . href = "index.html" ;
+}
+      
+
+      function  cargaPasatiempos ( )  {
+        firestore . colección ( "PASATIEMPO" ) . onSnapshot (
+          querySnapshot  =>  {
+            // Opción cuando el pasatiempo no está definido.
+            pasatiempo . innerHTML  =  / * html * /
+              `<option value =" "> - Sin Pasatiempo - </option>` ;
+            querySnapshot . paraCada ( doc  =>  {
+               datos  constantes =  doc . datos ( ) ;
+              pasatiempo . innerHTML  + =  / * html * /
+                `<option value =" $ { cod ( doc . id ) } ">
+                  $ { cod ( datos . PAS_NOMBRE ) }
+                </opción> ` ;
+            } ) ;
+          } ,
+          e  =>  {
+            procesaError ( e ) ;
+            cargaPasatiempos ( ) ;
+          }
+        ) ;
+      }
+       función  asíncrona cargaRoles ( )  {
+        firestore . colección ( "ROL" ) . onSnapshot (
+          querySnapshot  =>  {
+            roles . innerHTML  =  "" ;
+            querySnapshot . paraCada ( doc  =>  {
+              roles . innerHTML  + =  / * html * /
+                `<br> <etiqueta>
+                  <input type = "checkbox" name = "roles" value = " $ { cod ( doc . id ) } ">
+                   <span>
+                    <strong> $ { cod ( doc . id ) } </strong> <br>
+                    ( $ { cod ( doc . datos ( ) . ROL_DESCR ) } )
+                  </span>
+                </label>
+                <br> ` ;
+            } ) ;
+          } ,
+          e  =>  {
+            procesaError ( e ) ;
+            cargaRoles ( ) ;
+          }
+        ) ;
+      }
+      function  muestraLista ( )  {
+        firestore . colección ( "USUARIO" ) . onSnapshot (
+          async  querySnapshot  =>  {
+            / * Genera un listado de Promise que descargan datos de la base de
+            * datos y espera a que todas terminen. * /
+             promesas  const =  [ ] ;
+            // Agrega una Promise al erreglo.
+            querySnapshot . forEach ( doc  =>  promesas . push ( calculaCelda ( doc ) ) ) ;
+            // Espera a que todas las Promise terminen.
+            const  celdas  =  aguardar  Promesa . todas ( promesas ) ;
+            // Llena la lista con los resultados de la consulta.
+            lista . innerHTML  =  "" ;
+            para  ( celda constante  de celdas ) {   
+              lista . innerHTML  + =  celda ;
+            }
+          } ,
+          e  =>  {
+            procesaError ( e ) ;
+            muestraLista ( ) ;
+          }
+        ) ;
+      }
+     
+       función  asíncrona calculaCelda ( doc )  {
+         datos  constantes =  doc . datos ( ) ;
+        // Obtiene lo datos del id del pasatiempo.
+        const  pasaDoc  =  datos . PAS_ID
+          ? aguardar  firestore . colección ( "PASATIEMPO" ) . doc ( datos . PAS_ID ) . obtener ( )
+          : nulo ;
+        const  pasaNombre  =  ( pasaDoc  &&  pasaDoc . existe ) ?
+          pasaDoc . datos ( ) . PAS_NOMBRE : "- Sin Pasatiempo -" ;
+        // Obtiene lo datos de los id de los roles.
+        const  rolDocs  =  ( aguardar  Promesa . todos ( ( datos . ROL_IDS  ||  [ ] )
+          . mapa ( async  rolId  =>
+            aguardar  firestore . colección ( "ROL" ) . doc ( rolId ) . obtener ( ) ) ) )
+          . filtro ( doc  =>  doc . existe ) ;
+         roles  const =  rolDocs
+          . map ( doc  =>  ` $ { doc . id } : $ { doc . data ( ) . ROL_DESCR } ` )
+          . sort ( ) ;
+        // url de la imagen. Usan como nombre el id del usuario.
+        const  url  =  aguardar  almacenamiento . ref ( identificación del doc . ) . getDownloadURL ( ) ;
+        retorno  ( / * html * /
+          `<li class =" doc "onclick =" muestra (' $ { cod ( doc . id ) } ') ">
+            <figura>
+              <img src = " $ { cod ( url ) } " alt = " $ { cod ( doc . id ) } " width = "200px">
+            </figure>
+            <div>
+              <strong> $ { cod ( doc . id ) } </strong> <br>
+              $ { cod ( pasaNombre ) } <br>
+              $ { roles . mapa ( bacalao ) . unirse ( "<br>" ) }
+            </div>
+          </li> <br> ` ) ;
+      }
+      function  agrega ( )  {
+        agregar . discapacitado  =  verdadero ;
+        eliminar . discapacitado  =  verdadero ;
+        figura . oculto  =  verdadero ;
+        cue . readOnly  =  falso ;
+        cue . requerido  =  verdadero ;
+        imagen . requerido  =  verdadero ;
+        id  =  "" ;
+        cue . valor  =  "" ;
+        imagen . valor  =  "" ;
+        pasatiempo . valor  =  "" ;
+        roles . valor  =  [ ] ;
+      }
+       función  asíncrona muestra ( selección )  {
+        prueba  {
+          agregar . inhabilitado  =  falso ;
+          eliminar . inhabilitado  =  falso ;
+          figura . oculto  =  falso ;
+          cue . readOnly  =  true ;
+          cue . requerido  =  falso ;
+          imagen . requerido  =  falso ;
+          deja  doc  =
+            aguardar  firestore . colección ( "USUARIO" ) . doc ( selección ) . obtener ( ) ;
+          si  ( doc . existe )  {
+            id  =  doc . id ;
+            dejar  datos  =  doc . datos ( ) ;
+            cue . valor  =  doc . id ;
+            imagen . valor  =  "" ;
+            pasatiempo . valor  =  datos . PAS_ID  ||  "" ;
+            roles . valor  =  datos . ROL_IDS ;
+            img . src  =  aguardar  almacenamiento . ref ( identificación del doc . ) . getDownloadURL ( ) ;
+          }  más  {
+            alert ( "El usuario seleccionado no está registrado." ) ;
+            agrega ( ) ;
+          }
+        }  captura  ( e )  {
+          procesaError ( e )
+        }
+      }
+      function  leeModelo ( )  {
+        volver  {
+          PAS_ID : pasatiempo . valor  ||  nula ,
+          ROL_IDS : roles . valor
+        } ;
+      }
+       función  asíncrona guarda ( )  {
+        prueba  {
+          dejar  ref ;
+          si  ( id )  {
+            ref  =  firestore . colección ( "USUARIO" ) . doc ( id ) ;
+          }  más  {
+            ref  =  firestore . colección ( "USUARIO" ) . doc ( valor de cue . ) ;
+          }
+          if  ( fileSeleccionado ( imagen ) )  {
+            const  refStorage  =  almacenamiento . ref ( ref . id ) ;
+            aguardar  refStorage . poner ( archivos de imagen . [ 0 ] ) ;
+          }
+          aguardar  ref . conjunto ( leeModelo ( ) ) ;
+          agrega ( ) ;
+        }  captura  ( e )  {
+          procesaError ( e ) ;
+        }
+      }
+      / ** Elimina un registro en la base de datos. * /
+       función  asíncrona elimina ( )  {
+        prueba  {
+          if  ( confirm ( "Confirma la eliminación." ) )  {
+            aguardar  firestore . colección ( "USUARIO" ) . doc ( id ) . eliminar ( ) ;
+            almacenamiento . ref ( id ) . eliminar ( ) ;
+            agrega ( ) ;
+          }
+        }  captura  ( e )  {
+          procesaError ( e ) ;
+        }
+      }
+       función  asíncrona cierraSesion ( )  {
+        prueba  {
+          base de fuego . auth ( ) . signOut ( ) . entonces ( función ( )  {
+  // Cierre de sesión exitoso.
+} ) . catch ( function ( error )  {
+  // Ocurrió un error.
+} ) ;
+        }  captura  ( e )  {
+          procesaError ( e ) ;
+        }
+       
+      }
+    </ script >
+  </ cuerpo >
+</ html >
